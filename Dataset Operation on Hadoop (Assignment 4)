@@ -1,0 +1,117 @@
+
+Operation on dataset In Java Using Hadoop
+
+Step 1: Download and Prepare the Dataset
+	i.e. :  -> Download the dataset from the provided Kaggle link: https://www.kaggle.com/datasets/victorcaelina/tuberculosis-symptoms
+		Tuberculosis Symptoms Dataset.
+		-> Extract the dataset and locate the file Tb disease symptoms.csv.
+		-> Ensure the dataset is clean and formatted correctly. For example:
+	
+Step 2: Create the MapReduce Program
+	i.e. : TBSymptomAnalysis.java
+	import java.io.IOException;
+import java.util.StringTokenizer;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class TBSymptomAnalysis {
+
+    // Mapper class
+    public static class SymptomMapper extends Mapper<Object, Text, Text, IntWritable> {
+        private final static IntWritable one = new IntWritable(1);
+        private Text symptom = new Text();
+
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String[] tokens = value.toString().split(",");
+            for (int i = 1; i < tokens.length; i++) { // Skip PatientID (first column)
+                symptom.set(tokens[i].trim());
+                context.write(symptom, one);
+            }
+        }
+    }
+
+    // Reducer class
+    public static class SymptomReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+        private IntWritable result = new IntWritable();
+
+        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum += val.get();
+            }
+            result.set(sum);
+            context.write(key, result);
+        }
+    }
+
+    // Main method
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "TB Symptom Analysis");
+        job.setJarByClass(TBSymptomAnalysis.class);
+        job.setMapperClass(SymptomMapper.class);
+        job.setCombinerClass(SymptomReducer.class);
+        job.setReducerClass(SymptomReducer.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+}
+
+Step 3 : Compile the java program
+	i.e. javac -classpath `hadoop classpath` -d . TBSymptomAnalysis.java
+	
+Step 4 : Create JAR File
+	i.e. : jar -cvf TBSymptomAnalysis.jar TBSymptomAnalisis*.class
+	
+Step 5 : Verify JAR file
+	i.e. : jar -tf TBSymptomAnalysis.jar
+	
+		it gives bellow lines
+		META-INF/
+		META-INF/MANIFEST.MF
+		TBSymptomAnalysis$SymptomMapper.class
+		TBSymptomAnalysis$SymptomReducer.class
+		TBSymptomAnalysis.class
+
+		
+Step 6 : Create the /user/hadoop/tb_symptoms/input
+	-> hdfs dfs -mkdir -p /user/hadoop/tb_symptoms/input
+	
+	For Delete folders 
+	-> hadoop fs -rm -r /user/hadoop/matrix/output
+	
+	Verify using
+	-> hdfs dfs -ls /user/hadoop/tb_symptoms/output
+	
+Step 7 : Upload the dataset to HDFS
+	-> hdfs dfs -put Tb\ disease\ symptoms.csv /user/hadoop/tb_symptoms/input
+	
+	Verify using
+	-> hdfs dfs -ls /user/hadoop/tb_symptoms/input
+	
+Step 8 : Run The Hadoop job
+	-> hadoop jar TBSymptomAnalysis.jar TBSymptomAnalysis /user/hadoop/tb_symptoms/input /user/hadoop/tb_symptoms/output
+	
+	Verify Using
+	-> hdfs dfs -ls /user/hadoop/tb_symptoms/output
+	
+	Finally View Output
+	-> hdfs dfs -cat /user/hadoop/tb_symptoms/output/part-r-00000
+	
+	It Gives Output like that 
+	-> 	Cough            3
+		  Fever            2
+		  Weight Loss      2
+		  Fatigue          1
+		  Night Sweats     1
