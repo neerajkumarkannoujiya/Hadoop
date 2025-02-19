@@ -1,0 +1,151 @@
+Matrix Multiplication In Java Using Hadoop
+
+Step 1: Create matrixA.txt
+	i.e. :  A,0,0,1
+		A,0,1,2
+		A,1,0,3
+		A,1,1,4
+	Similarly matrixB.txt
+		B,0,0,5
+		B,0,1,6
+		B,1,0,7
+		B,1,1,8
+	
+Step 2: Create MatrixMultiplication.java file
+	i.e. :
+	import java.io.IOException;
+	import java.util.*;
+
+	import org.apache.hadoop.conf.Configuration;
+	import org.apache.hadoop.fs.Path;
+	import org.apache.hadoop.io.Text;
+	import org.apache.hadoop.mapreduce.Job;
+	import org.apache.hadoop.mapreduce.Mapper;
+	import org.apache.hadoop.mapreduce.Reducer;
+	import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+	import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+	public class MatrixMultiplication {
+
+	    // Mapper class
+	    public static class MatrixMapper extends Mapper<Object, Text, Text, Text> {
+		private Text outputKey = new Text();
+		private Text outputValue = new Text();
+
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+		    String[] tokens = value.toString().split(",");
+		    String matrixName = tokens[0];
+		    int row = Integer.parseInt(tokens[1]);
+		    int col = Integer.parseInt(tokens[2]);
+		    int val = Integer.parseInt(tokens[3]);
+
+		    if (matrixName.equals("A")) {
+                	// Emit (key: row of A, value: (A, col, val))
+		        for (int k = 0; k < 2; k++) { // Assuming matrix B has 2 columns
+		            outputKey.set(row + "," + k);
+		            outputValue.set("A," + col + "," + val);
+		            context.write(outputKey, outputValue);
+		        }
+            	    } else if (matrixName.equals("B")) {
+                     // Emit (key: col of B, value: (B, row, val))
+                     for (int i = 0; i < 2; i++) { // Assuming matrix A has 2 rows
+                    	outputKey.set(i + "," + col);
+                    	outputValue.set("B," + row + "," + val);
+                    	context.write(outputKey, outputValue);
+                     }
+             }
+        }
+    }
+
+    // Reducer class
+    public static class MatrixReducer extends Reducer<Text, Text, Text, Text> {
+        public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+            Map<Integer, Integer> matrixA = new HashMap<>();
+            Map<Integer, Integer> matrixB = new HashMap<>();
+
+            for (Text value : values) {
+                String[] tokens = value.toString().split(",");
+                String matrixName = tokens[0];
+                int index = Integer.parseInt(tokens[1]);
+                int val = Integer.parseInt(tokens[2]);
+
+                if (matrixName.equals("A")) {
+                    matrixA.put(index, val);
+                } else if (matrixName.equals("B")) {
+                    matrixB.put(index, val);
+                }
+            }
+
+            // Perform multiplication
+            int result = 0;
+            for (int k : matrixA.keySet()) {
+                if (matrixB.containsKey(k)) {
+                    result += matrixA.get(k) * matrixB.get(k);
+                }
+            }
+
+            context.write(key, new Text(Integer.toString(result)));
+        }
+    }
+
+    // Main method
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "Matrix Multiplication");
+        job.setJarByClass(MatrixMultiplication.class);
+        job.setMapperClass(MatrixMapper.class);
+        job.setReducerClass(MatrixReducer.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(Text.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+}
+
+Step 3 : Compile the java program
+	i.e. javac -classpath `hadoop classpath` -d . MatrixMultiplication.java
+	
+Step 4 : Create JAR File
+	i.e. : jar -cvf MatrixMultiplication.jar MatrixMultiplication*.class
+	
+Step 5 : Verify JAR file
+	i.e. : jar -tf MatrixMultiplication.jar
+	
+		it gives bellow lines
+		META-INF/
+		META-INF/MANIFEST.MF
+		MatrixMultiplication.class
+		MatrixMultiplication$MatrixMapper.class
+		MatrixMultiplication$MatrixReducer.class
+		
+Step 6 : Create the /user/hadoop/matrix/input
+	-> hdfs dfs -mkdir -p /user/hadoop/matrix/input
+	
+	For Delete folders 
+	-> hadoop fs -rm -r /user/hadoop/matrix/output
+	
+	Verify using
+	-> hdfs dfs -ls /user/hadoop/matrix/output
+	
+Step 7 : Upload the Input File to HDFS
+	-> hdfs dfs -put matrixA.txt /user/hadoop/matrix/input
+	   hdfs dfs -put matrixB.txt /user/hadoop/matrix/input
+	
+	Verify using
+	-> hdfs dfs -ls /user/hadoop/matrix/input
+	
+Step 8 : Run The Hadoop job
+	-> hadoop jar MatrixMultiplication.jar MatrixMultiplication /user/hadoop/matrix/input /user/hadoop/matrix/output
+	
+	Verify Using
+	-> hdfs dfs -ls /user/hadoop/matrix/output
+	
+	Finally View Output
+	-> hdfs dfs -cat /user/hadoop/matrix/output/part-r-00000
+	
+	It Gives Output like that 
+	-> 	0,0    19
+		0,1    22
+		1,0    43
+		1,1    50
