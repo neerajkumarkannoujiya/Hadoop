@@ -83,16 +83,22 @@ Step 5 : Verify JAR file
 		
 Step 6 : Create the /user/hadoop/input
 	-> hdfs dfs -mkdir -p /user/hadoop/input
+
+	For Delete folders 
+	-> hadoop fs -rm -r /user2/hadoop/matrix/output
+
 	Verify using
 	-> hdfs dfs -ls /user/hadoop/input
 	
 Step 7 : Upload the Input File to HDFS
 	-> hdfs dfs -put /home/neeraj7388011/input.txt /user/hadoop/input
+
 	Verify using
 	-> hdfs dfs -ls /user/hadoop/input
 	
 Step 8 : Run The Hadoop job
 	-> hadoop jar /home/neeraj7388011/WordCount.jar WordCount /user/hadoop/input /user/hadoop/output
+
 	Verify Using
 	-> hdfs dfs -ls /user/hadoop/output
 	
