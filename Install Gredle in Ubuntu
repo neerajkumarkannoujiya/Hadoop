@@ -1,0 +1,49 @@
+Install Gredle in Ubuntu
+
+Step 1: Update Your System
+First, ensure your system is up to date:
+sudo apt update
+sudo apt upgrade
+
+Step 2: Verify Java Installation
+Make sure Java 8 is installed and set as the default Java version:
+java -version
+You should see something like:
+openjdk version "1.8.0_xxx"
+
+If Java 8 is not installed, you can install it using:
+sudo apt install openjdk-8-jdk
+
+Step 3: Download Gradle
+Visit the Gradle releases page to find the latest stable version.
+Copy the download link for the binary-only distribution.
+For example, to download Gradle 8.5 (replace the version with the latest one):
+wget https://services.gradle.org/distributions/gradle-8.5-bin.zip
+
+Step 4: Install Gradle
+Extract the downloaded file:
+sudo unzip gradle-8.5-bin.zip -d /opt/gradle
+Create a symbolic link to make it easier to use:
+sudo ln -s /opt/gradle/gradle-8.5 /opt/gradle/latest
+
+Step 5: Set Up Environment Variables
+Open your .bashrc or .zshrc file for editing:
+nano ~/.bashrc
+Add the following lines at the end of the file:
+export GRADLE_HOME=/opt/gradle/latest
+export PATH=${GRADLE_HOME}/bin:${PATH}
+Save and exit the editor, then reload the shell configuration:
+source ~/.bashrc
+
+Step 6: Verify Gradle Installation
+Check if Gradle is installed correctly:
+gradle -v
+You should see output similar to:
+------------------------------------------------------------
+Gradle 8.5
+------------------------------------------------------------
+...
+
+Step 7: Create a Gradle Project
+To create a new Gradle project, navigate to your desired directory and run:
+gradle init
