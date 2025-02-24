@@ -95,7 +95,7 @@ Step 6 : Create the /user/hadoop/tb_symptoms/input
 	-> hdfs dfs -ls /user/hadoop/tb_symptoms/input
 	
 Step 7 : Upload the dataset to HDFS
-	-> hdfs dfs -put Tb\ disease\ symptoms.csv /user/hadoop/tb_symptoms/input
+	-> hdfs dfs -put symptoms.csv /user/hadoop/tb_symptoms/input
 	
 	Verify using
 	-> hdfs dfs -ls /user/hadoop/tb_symptoms/input
