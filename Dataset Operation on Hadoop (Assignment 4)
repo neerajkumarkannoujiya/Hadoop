@@ -72,7 +72,7 @@ Step 3 : Compile the java program
 	i.e. javac -classpath `hadoop classpath` -d . TBSymptomAnalysis.java
 	
 Step 4 : Create JAR File
-	i.e. : jar -cvf TBSymptomAnalysis.jar TBSymptomAnalisis*.class
+	i.e. : jar -cvf TBSymptomAnalysis.jar TBSymptomAnalysis*.class
 	
 Step 5 : Verify JAR file
 	i.e. : jar -tf TBSymptomAnalysis.jar
