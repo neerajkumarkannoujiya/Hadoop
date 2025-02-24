@@ -1,0 +1,75 @@
+Kafka Installation & KRaft Setup on Java 11
+
+🚀 Step 1: Install Java 11
+Kafka (compatible with Java 11) requires Java to run.
+	-> sudo apt update
+	-> sudo apt install openjdk-11-jdk -y
+	-> java -version
+	-> Make sure Java 11 is active:
+	-> sudo update-alternatives --config java
+	
+✅ Step 2: Download & Extract Kafka
+Download Kafka (e.g., version 3.1.0):
+	-> wget https://downloads.apache.org/kafka/3.1.0/kafka_2.13-3.1.0.tgz
+	Extract it:
+	-> tar -xzf kafka_2.13-3.1.0.tgz
+	-> mv kafka_2.13-3.1.0 ~/kafka
+	-> cd ~/kafka
+	
+✅ Step 3: Configure Kafka for KRaft Mode
+Open the KRaft config:
+	-> nano config/kraft/server.properties
+	
+	Ensure these essential properties exist:
+	properties
+	# Broker ID
+	-> node.id=1
+
+	# Listeners
+	-> listeners=PLAINTEXT://localhost:9092,CONTROLLER://localhost:9093
+	-> listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+	-> inter.broker.listener.name=PLAINTEXT
+
+	# Log directories
+	-> log.dirs=/home/<USER>/kafka/kraft-combined-logs
+	-> metadata.log.dir=/home/$USER/kafka/kraft-metadata-logs
+
+	# Log directory (for temporary purpose it removes data after shutdown)
+	-> log.dirs=/tmp/kraft-combined-logs
+
+	# Enable KRaft mode
+	-> process.roles=broker,controller
+
+	# Controller Quorum Voters
+	-> controller.quorum.voters=1@localhost:9093
+
+	# Controller Listener
+	-> controller.listener.names=CONTROLLER
+	Save and exit (Ctrl + X, then Y).
+
+✅ Step 4: Format the Log Directory with kafka-storage.sh
+Generate a Cluster ID:
+	-> bin/kafka-storage.sh random-uuid
+	Example Output:
+	-> c0a8e8e4-0f2e-4d33-9b2a-7c2e3cf2c1f5
+	Format Kafka logs:
+	-> bin/kafka-storage.sh format -t <CLUSTER_ID> -c config/kraft/server.properties
+	Replace <CLUSTER_ID> with the one you generated.
+
+✅ Step 5: Start Kafka in KRaft Mode
+	-> bin/kafka-server-start.sh config/kraft/server.properties
+	If all is configured correctly, Kafka will start without Zookeeper, using KRaft mode.
+
+⚡ Step 6: Verify Kafka Setup
+	Create a topic:
+	-> bin/kafka-topics.sh --create --topic test-topic --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+	List topics:
+	-> bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+
+	Start a producer:
+	-> bin/kafka-console-producer.sh --topic test-topic --bootstrap-server localhost:9092
+
+	Start a consumer:
+	-> bin/kafka-console-consumer.sh --topic test-topic --from-beginning --bootstrap-server localhost:9092
+	
+	To Check that Type JPS...............
