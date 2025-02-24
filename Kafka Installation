@@ -73,3 +73,10 @@ Generate a Cluster ID:
 	-> bin/kafka-console-consumer.sh --topic test-topic --from-beginning --bootstrap-server localhost:9092
 	
 	To Check that Type JPS...............
+	It will shows like
+	i.e.
+		8804 Kafka
+		10745 Jps
+		10076 ConsoleProducer
+		10413 ConsoleConsumer
+
