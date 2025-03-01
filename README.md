@@ -18,7 +18,7 @@ Cardiovascular diseases (CVDs) are a leading cause of mortality worldwide. This 
 ---
 
 ## 📜 System Architecture
-![System Architecture](https://via.placeholder.com/800x400)
+![System Architecture](Methodology.png)
 
 1. **Event Producer**: Collects CVD-related data from sensors, repositories, or APIs.  
 2. **Event Processing**: Uses Kafka for message handling, Spark for processing, and Siddhi CEP for complex event pattern detection.  
