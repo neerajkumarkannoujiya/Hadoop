@@ -104,8 +104,8 @@ The real-time dashboard provides **CVD risk analysis** categorized into:
 ---
 
 ## 📬 Contact
-📧 Email: your.email@example.com  
-🔗 GitHub: [your-github-profile](https://github.com/your-github)  
-🌐 LinkedIn: [your-linkedin-profile](https://linkedin.com/in/yourprofile)  
+📧 Email: neerajkumar7388011@gmail.com  
+🔗 GitHub: [your-github-profile](https://github.com/neerajkumarkannoujiya)  
+🌐 LinkedIn: [your-linkedin-profile](https://www.linkedin.com/in/neerajkumarkannoujiya/)  
 
 **⭐ If you like this project, give it a star on GitHub!**
